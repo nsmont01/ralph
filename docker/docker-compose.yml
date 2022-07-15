@@ -21,6 +21,31 @@ services:
         REDIS_PASSWORD: ""
         REDIS_PORT: 6379
         REDIS_DB: 0
+    depends_on:
+    - init
+
+  init: 
+    image: allegro/ralph:latest
+    volumes:
+      - ralph_media:/var/local/ralph/media
+      - ralph_static:/usr/share/ralph/static
+    links:
+      - db
+      - redis
+    depends_on:
+      - db
+      - redis
+    environment:
+        DATABASE_NAME: ralph_ng
+        DATABASE_USER: ralph_ng
+        DATABASE_PASSWORD: ralph_ng
+        DATABASE_HOST: db
+        REDIS_HOST: redis
+        REDIS_PASSWORD: ""
+        REDIS_PORT: 6379
+        REDIS_DB: 0
+    command: ["init"]
+
 
   nginx:
     image: allegro/ralph-static-nginx:latest
@@ -29,7 +54,10 @@ services:
       - "80:80"
     volumes:
       - ralph_media:/opt/media
-
+    links:
+      - db
+      - redis
+ 
   db:
     image: mysql:5.7
     environment:
